@@ -1,0 +1,14 @@
+Analyzing childcard...                                          
+
+  error • Target of URI doesn't exist: 'package:flutter_gen/gen_l10n/app_localizations.dart' • lib/main.dart:6:8 • uri_does_not_exist
+  error • Undefined name 'AppLocalizations' • lib/main.dart:32:14 • undefined_identifier
+  error • Undefined name 'AppLocalizations' • lib/main.dart:33:31 • undefined_identifier
+  error • Undefined name 'AppLocalizations' • lib/main.dart:34:25 • undefined_identifier
+warning • Unused import: 'dart:io' • lib/views/screens/home_screen.dart:10:8 • unused_import
+warning • The value of the local variable 'userName' isn't used • lib/views/screens/home_screen.dart:105:11 • unused_local_variable
+warning • The value of the local variable 'userEmail' isn't used • lib/views/screens/home_screen.dart:106:11 • unused_local_variable
+warning • The declaration '_buildSectionTitle' isn't referenced • lib/views/screens/home_screen.dart:361:10 • unused_element
+warning • The declaration '_buildInfoTile' isn't referenced • lib/views/screens/home_screen.dart:374:10 • unused_element
+warning • The declaration '_buildActionCard' isn't referenced • lib/views/screens/home_screen.dart:408:10 • unused_element
+warning • The declaration '_showAboutDialog' isn't referenced • lib/views/screens/home_screen.dart:486:8 • unused_element
+

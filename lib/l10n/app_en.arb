@@ -1,0 +1,146 @@
+{
+  "helloWorld": "Hello World!",
+  "@helloWorld": {
+    "description": "The standard greeting"
+  },
+  "app_name":"Child Care",
+  "@app_name": {
+    "description": "The name of the app"
+  },
+  "welcome_back":"Welcome Back",
+  "@welcome_back": {
+    "description": "The welcome back message"
+  },
+  "email":"Email",
+  "@email": {
+    "description": "The email field label"
+  },
+  "password":"Password",
+  "@password": {
+    "description": "The password field label"
+  },
+  "login":"Login",
+  "@login": {
+    "description": "The login button text"
+  },
+  "signup":"Signup",
+  "@signup": {
+    "description": "The signup button text"
+  },
+  "forgot_password":"Forgot Password",
+  "@forgot_password": {
+    "description": "The forgot password button text"
+  },
+  "logout":"Logout",
+  "@logout": {
+    "description": "The logout button text"
+  },
+  "home":"Home",
+  "@home": {
+    "description": "The home screen title"
+  },
+  "email_error":"Please enter a valid email address",
+  "@email_error": {
+    "description": "The email error message"
+  },
+  "password_error":"Please enter a password",
+  "@password_error": {
+    "description": "The password error message"
+  },
+  "login_error":"Invalid email or password",
+  "@login_error": {
+    "description": "The login error message"
+  },
+  "signup_error":"Invalid email or password",
+  "@signup_error": {
+    "description": "The signup error message"
+  },
+  "forgot_password_error":"Invalid email or password",
+  "@forgot_password_error": {
+    "description": "The forgot password error message"
+  },
+  "logout_error":"Invalid email or password",
+  "@logout_error": {
+    "description": "The logout error message"
+  },
+  "login_success":"Login successful",
+  "@login_success": {
+    "description": "The login success message"
+  },
+  "signup_success":"Signup successful",
+  "@signup_success": {
+    "description": "The signup success message"
+  },
+  "forgot_password_success":"Forgot password successful",
+  "@forgot_password_success": {
+    "description": "The forgot password success message"
+  },
+  "logout_success":"Logout successful",
+  "@logout_success": {
+    "description": "The logout success message"
+  },
+  "do_not_have_an_account":"Do not have an account?",
+  "@do_not_have_an_account": {
+    "description": "The do not have an account message"
+  },
+  "password_length_error":"Password must be at least 6 characters",
+  "@password_length_error": {
+    "description": "The password length error message"
+  },
+  "full_name":"Full Name",
+  "@full_name": {
+    "description": "The full name field label"
+  },
+  "name_error":"Please enter your name",
+  "@name_error": {
+    "description": "The name error message"
+  },
+  "name_length_error":"Name must be at least 2 characters",
+  "@name_length_error": {
+    "description": "The name length error message"
+  },
+"recording_saved":"Recording saved successfully",
+"@recording_saved": {
+  "description": "The recording saved message"
+},
+"recording_error":"Recording failed",
+"@recording_error": {
+  "description": "The recording error message"
+},
+"recording_canceled":"Recording canceled",
+"@recording_canceled": {
+  "description": "The recording canceled message"
+}, 
+"users":"Users",
+"@users": {
+  "description": "The users message"
+},
+"user":"User",
+"@user": {
+  "description": "The user message"
+},
+"no_recording_available":"No recording available",
+"@no_recording_available": {
+  "description": "The no recording available message"
+},
+"microphone_permission_denied":"Microphone permission denied",
+"@microphone_permission_denied": {
+  "description": "The microphone permission denied message"
+},
+"are_you_sure_you_want_to_logout":"Are you sure you want to logout?",
+"@are_you_sure_you_want_to_logout": {
+  "description": "The are you sure you want to logout message"
+},
+"logout":"Logout",
+"@logout": {
+  "description": "The logout message"
+},
+"cancel":"Cancel",
+"@cancel": {
+  "description": "The cancel message"
+},
+"close":"Close",
+"@close": {
+  "description": "The close message"
+}
+} 
