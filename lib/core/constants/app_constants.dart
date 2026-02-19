@@ -3,10 +3,12 @@ class ApiConstants {
   static const String baseUrl = 'http://192.168.29.25:5001';
   static const String signIn = '/api/signin';
   static const String signUp = '/api/signup';
+  static const String upload = '/childcare/api/upload';
   
   // Complete URLs
   static String get signInUrl => '$baseUrl$signIn';
   static String get signUpUrl => '$baseUrl$signUp';
+  static String get uploadUrl => '$baseUrl$upload';
 }
 
 // Storage Keys

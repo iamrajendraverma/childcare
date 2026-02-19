@@ -25,6 +25,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isRecording = false;
   bool _isPlaying = false;
   String? _recordingPath;
+  List<File> _recordings = [];
+  String? _currentlyPlayingPath;
+
   
   @override
   void initState() {
@@ -33,9 +36,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted) {
         setState(() {
           _isPlaying = state == PlayerState.playing;
+          if (!_isPlaying) {
+            _currentlyPlayingPath = null;
+          }
         });
       }
     });
+    _loadRecordings();
   }
   
   @override
@@ -59,6 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(localizations.recording_saved)),
         );
+        _loadRecordings();
       }
     } else {
       // Start recording
@@ -102,6 +110,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   
   Future<void> _stopPlayback() async {
     await _audioPlayer.stop();
+    setState(() {
+      _isPlaying = false;
+      _currentlyPlayingPath = null;
+    });
+  }
+
+  Future<void> _loadRecordings() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final files = directory.listSync().where((file) {
+        return file is File && file.path.endsWith('.m4a') && file.path.contains('recording_');
+      }).map((file) => file as File).toList();
+      
+      // Sort by date (newest first)
+      files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+      
+      setState(() {
+        _recordings = files;
+      });
+    } catch (e) {
+      debugPrint('Error loading recordings: $e');
+    }
+  }
+
+  Future<void> _playRecording(String path) async {
+    if (_isPlaying && _currentlyPlayingPath == path) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(DeviceFileSource(path));
+      setState(() {
+        _currentlyPlayingPath = path;
+      });
+    }
+  }
+
+  Future<void> _deleteRecording(File file) async {
+    try {
+      await file.delete();
+      _loadRecordings();
+      if (mounted) { // mounted is a bool property of State class which is true if the widget is in the widget tree
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Recording deleted')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error deleting recording: $e');
+    }
   }
 
   @override
@@ -140,6 +196,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               // Voice Recording Card
               _buildVoiceRecordingCard(),
+              const SizedBox(height: 24),
+              _buildSectionTitle(context, 'Recent Recordings'),
+              const SizedBox(height: 12),
+              _buildRecordingsList(),
             ],
           ),
         ),
@@ -361,6 +421,165 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRecordingsList() {
+    if (_recordings.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            children: [
+              Icon(Icons.library_music_outlined, size: 48, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                'No recordings yet',
+                style: TextStyle(color: Colors.grey[500], fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _recordings.length,
+      itemBuilder: (context, index) {
+        final file = _recordings[index];
+        final fileName = file.path.split('/').last;
+        final timestamp = fileName.replaceAll('recording_', '').replaceAll('.m4a', '');
+        final date = DateTime.fromMillisecondsSinceEpoch(int.tryParse(timestamp) ?? 0);
+        final isPlaying = _isPlaying && _currentlyPlayingPath == file.path;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              leading: GestureDetector(
+                onTap: () => _playRecording(file.path),
+                child: CircleAvatar(
+                  backgroundColor: isPlaying ? Colors.blue.withValues(alpha: 0.1) : Colors.grey[100],
+                  child: Icon(
+                    isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: isPlaying ? Colors.blue : Colors.grey[600],
+                  ),
+                ),
+              ),
+              title: Text(
+                'Recording ${index + 1}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    onPressed: () => _showDeleteConfirmation(file),
+                  ),
+                  const Icon(Icons.expand_more, color: Colors.grey),
+                ],
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Recording Notes',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                        ),
+                        child: const Text(
+                          'Transcription will appear here after the recording is processed. This is current a placeholder for the non-editable text area.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Uploading Recording ${index + 1} to server...'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          // Logic for upload would go here
+                          debugPrint('Uploading ${file.path}');
+                          ref.read(homeViewModelProvider.notifier).uploadRecording(file.path);
+                          
+                        },
+                        icon: const Icon(Icons.cloud_upload_outlined),
+                        label: const Text('Upload Recording'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(File file) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Recording'),
+        content: const Text('Are you sure you want to delete this recording?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteRecording(file);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
