@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../core/constants/app_constants.dart';
+import '../models/cry_analysis_model.dart';
 
 class HomeRepository {
   final http.Client _client;
@@ -54,6 +55,40 @@ class HomeRepository {
         return {
           'success': false,
           'message': responseData['message'] ?? 'Upload failed with status: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchCryAnalyses({
+    required String token,
+  }) async {
+    try {
+      final response = await _client.get(
+        Uri.parse(ApiConstants.cryAnalysisUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        final List<dynamic> rawList = responseData['cry_analyses'] ?? [];
+        final analyses = rawList
+            .map((e) => CryAnalysis.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return {'success': true, 'data': analyses};
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to fetch analyses',
         };
       }
     } catch (e) {

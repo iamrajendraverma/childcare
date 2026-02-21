@@ -4,11 +4,13 @@ class ApiConstants {
   static const String signIn = '/api/signin';
   static const String signUp = '/api/signup';
   static const String upload = '/childcare/api/upload';
+  static const String cryAnalysis = '/childcare/api/cry-analysis';
   
   // Complete URLs
   static String get signInUrl => '$baseUrl$signIn';
   static String get signUpUrl => '$baseUrl$signUp';
   static String get uploadUrl => '$baseUrl$upload';
+  static String get cryAnalysisUrl => '$baseUrl$cryAnalysis';
 }
 
 // Storage Keys

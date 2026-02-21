@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/storage_service.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../../viewmodels/home_viewmodel.dart';
 import 'login_screen.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
+import '../../data/models/cry_analysis_model.dart';
 import '../../l10n/app_localizations.dart';
 
 
@@ -426,6 +428,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildRecordingsList() {
+    // Read cry analyses from ViewModel state
+    final cryAnalyses = ref.watch(homeViewModelProvider).cryAnalyses;
+    debugPrint("creating the recordings list");
+
+
     if (_recordings.isEmpty) {
       return Center(
         child: Padding(
@@ -451,10 +458,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       itemBuilder: (context, index) {
         final file = _recordings[index];
         final fileName = file.path.split('/').last;
+
         final timestamp = fileName.replaceAll('recording_', '').replaceAll('.m4a', '');
         final date = DateTime.fromMillisecondsSinceEpoch(int.tryParse(timestamp) ?? 0);
         final isPlaying = _isPlaying && _currentlyPlayingPath == file.path;
 
+        // Find matching cry analysis by file name
+        final matchedAnalysis = cryAnalyses.firstWhere(
+          (a) => getBaseName(a.fileName) == getBaseName(fileName),
+          orElse: () => CryAnalysis(
+            analysis: '',
+            fileName: '',
+            model: '',
+            timestamp: '',
+            userId: '',
+          ),
+        );
+        final analysisText = matchedAnalysis.fileName.isNotEmpty
+            ? matchedAnalysis.analysis
+            : null;
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 1,
@@ -474,7 +496,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               title: Text(
-                'Recording ${index + 1}',
+                'Baby Cry ${index + 1}',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
@@ -500,7 +522,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const Divider(),
                       const SizedBox(height: 12),
                       const Text(
-                        'Recording Notes',
+                        'Cry Analysis',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -515,21 +537,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                         ),
-                        child: const Text(
-                          'Transcription will appear here after the recording is processed. This is current a placeholder for the non-editable text area.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.5,
-                          ),
-                        ),
+                        child: analysisText != null
+                            ? Text(
+                                analysisText,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  height: 1.5,
+                                ),
+                              )
+                            : Text(
+                                'No analysis available yet. Upload this recording to get a cry analysis.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  height: 1.5,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Uploading Recording ${index + 1} to server...'),
+                              content: Text('Uploading Baby Cry ${index + 1} to server...'),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -539,7 +571,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           
                         },
                         icon: const Icon(Icons.cloud_upload_outlined),
-                        label: const Text('Upload Recording'),
+                        label: const Text('Upload Baby Cry'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
@@ -565,8 +597,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Recording'),
-        content: const Text('Are you sure you want to delete this recording?'),
+        title: const Text('Delete Baby Cry'),
+        content: const Text('Are sure you want to delete this Baby Cry?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -752,5 +784,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+
+  String getBaseName(String name) {
+    List<String> parts = name.split('_');
+    if (parts.length >= 2) {
+      // Joins 'recording' and '1771528384565' back together
+      return "${parts[0]}_${parts[1].split('.').first}";
+    }
+    return name;
   }
 }
